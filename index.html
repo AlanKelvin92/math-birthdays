@@ -14,6 +14,9 @@
         .mdl-layout__header{
             position: absolute;
         }
+        .mdl-layout__header-row{
+            padding: 0 16px 0 35px;
+        }
         .page-content{
             display: flex;
             align-items: center;
@@ -21,6 +24,21 @@
             position: fixed;
             height: 100%;
             width: 100%;
+        }
+        .math-bday-form{
+            display: flex;
+            flex-direction: column;
+        }
+        #birthday-mobile{
+            display: none;
+        }
+        @media only screen and (max-width: 768px) {
+            #birthday{
+                display: none;
+            }
+            #birthday-mobile{
+                display: block;
+            }
         }
     </style>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
@@ -31,10 +49,11 @@
         </header>
         <main class="mdl-layout__content">
             <div class="page-content">
-                <div class="">
-                    <h2 class="mdl-card__title-text">Find your math birthdays</h2>
+                <div class="math-bday-form">
+                    <h4>Find your math birthdays</h4>
                     <div class="mdl-textfield mdl-js-textfield">
                         <input class="mdl-textfield__input" type="text" id="birthday" data-toggle="datepicker">
+                        <input class="mdl-textfield__input" type="date" id="birthday-mobile">
                     </div>
                     <button id="go-btn" class="mdl-button mdl-js-button mdl-button--raised" type="button">Go</button>
                     <div id="error-toast" class="mdl-js-snackbar mdl-snackbar">
@@ -43,27 +62,23 @@
                     </div>
                 </div>
             </div>
+            <dialog class="mdl-dialog">
+                <h4 class="mdl-dialog__title">...And the result is</h4>
+                <div class="mdl-dialog__content">
+                    <p id="math-birthday-answer"></p>
+                </div>
+                <div class="mdl-dialog__actions">
+                    <button type="button" class="mdl-button close">Gotcha!</button>
+                </div>
+            </dialog>
         </main>
     </div>
-    <dialog class="mdl-dialog">
-    <h4 class="mdl-dialog__title">...And the result is</h4>
-        <div class="mdl-dialog__content">
-            <p id="math-birthday-answer">
-                
-            </p>
-        </div>
-        <div class="mdl-dialog__actions">
-            <button type="button" class="mdl-button close">Gotcha!</button>
-        </div>
-    </dialog>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
     <script src="vendors/datepicker.min.js"></script>
     <script>
         (function() {
-            $('[data-toggle="datepicker"]').datepicker(); //Datepicker initializer
-
             const findNextMathBirthday = (birthday) =>{
                 const today = moment();
                 let mathBday = birthday;
@@ -79,14 +94,24 @@
 
             const bindEvents = () => {
                 const birthdayInput = document.querySelector('#birthday');
+                const birthdayMobileInput = document.querySelector('#birthday-mobile');
                 const goBtn = document.querySelector('#go-btn');
                 const toast = document.querySelector('#error-toast');
                 const mathBirthdayAnswer = document.querySelector('#math-birthday-answer');
                 const dialog = document.querySelector('dialog');
+
+                $('[data-toggle="datepicker"]').datepicker({
+                    format: "yyyy-mm-dd",
+                    endDate: "today"
+                }); //Datepicker initializer
+
+                birthdayMobileInput.max = moment().format("YYYY-MM-DD")
     
                 const proccessBirthday = (e) => {
                     if((e.type === 'keyup' && e.keyCode === 13) || e.type === 'click'){
-                        const birthdayDate = moment(birthdayInput.value, "MM-DD-YYYY");
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        let birthdayDate = isMobile ? birthdayMobileInput.value : birthdayInput.value;
+                        birthdayDate = moment(birthdayDate, "YYYY-MM-DD");
                         if(birthdayDate.isValid()){
                             const {yearsOld, mathBday} = findNextMathBirthday(birthdayDate)
                             mathBirthdayAnswer.innerText = `Your next math birthday is your ${yearsOld}-year-old birthday on ${mathBday}`;
@@ -100,7 +125,8 @@
                 };
     
                 goBtn.addEventListener('click', proccessBirthday);
-                birthdayInput.addEventListener('keyup', proccessBirthday)
+                birthdayInput.addEventListener('keyup', proccessBirthday);
+                birthdayMobileInput.addEventListener('keyup', proccessBirthday);
                 dialog.querySelector('.close').addEventListener('click', () => {
                     dialog.close();
                 });
