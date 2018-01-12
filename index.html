@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Math Birthdays</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css" />
+    <link rel="stylesheet" href="vendors/datepicker.min.css">
+</head>
+<body>
+    <style>
+        .mdl-layout__header{
+            position: absolute;
+        }
+        .page-content{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">Math Birthdays</span>
+            </div>
+        </header>
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <div class="">
+                    <h2 class="mdl-card__title-text">Find your math birthdays</h2>
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="birthday" data-toggle="datepicker">
+                    </div>
+                    <button id="go-btn" class="mdl-button mdl-js-button mdl-button--raised" type="button">Go</button>
+                    <div id="error-toast" class="mdl-js-snackbar mdl-snackbar">
+                        <div class="mdl-snackbar__text"></div>
+                        <button class="mdl-snackbar__action" type="button"></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <dialog class="mdl-dialog">
+    <h4 class="mdl-dialog__title">...And the result is</h4>
+        <div class="mdl-dialog__content">
+            <p id="math-birthday-answer">
+                
+            </p>
+        </div>
+        <div class="mdl-dialog__actions">
+            <button type="button" class="mdl-button close">Gotcha!</button>
+        </div>
+    </dialog>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+    <script src="vendors/datepicker.min.js"></script>
+    <script>
+        (function() {
+            $('[data-toggle="datepicker"]').datepicker(); //Datepicker initializer
+
+            const findNextMathBirthday = (birthday) =>{
+                const today = moment();
+                let mathBday = birthday;
+                let cont = 1;
+
+                while(mathBday.isSameOrBefore(today)){
+                    mathBday.add(Math.pow(10, cont), 'days');
+                    cont++;
+                }
+
+                return {yearsOld: cont, mathBday:moment(mathBday).format("MM-DD-YYYY") }
+            }
+
+            const bindEvents = () => {
+                const birthdayInput = document.querySelector('#birthday');
+                const goBtn = document.querySelector('#go-btn');
+                const toast = document.querySelector('#error-toast');
+                const mathBirthdayAnswer = document.querySelector('#math-birthday-answer');
+                const dialog = document.querySelector('dialog');
+    
+                const proccessBirthday = (e) => {
+                    if((e.type === 'keyup' && e.keyCode === 13) || e.type === 'click'){
+                        const birthdayDate = moment(birthdayInput.value, "MM-DD-YYYY");
+                        if(birthdayDate.isValid()){
+                            const {yearsOld, mathBday} = findNextMathBirthday(birthdayDate)
+                            mathBirthdayAnswer.innerText = `Your next math birthday is your ${yearsOld}-year-old birthday on ${mathBday}`;
+                            dialog.showModal();
+                        }else{
+                            const data = {message: 'Please select a valid date'};
+                            toast.MaterialSnackbar.showSnackbar(data);
+                        }
+                        e.preventDefault();
+                    }
+                };
+    
+                goBtn.addEventListener('click', proccessBirthday);
+                birthdayInput.addEventListener('keyup', proccessBirthday)
+                dialog.querySelector('.close').addEventListener('click', () => {
+                    dialog.close();
+                });
+            }
+
+            bindEvents();
+        }());
+    </script>
+</body>
+</html>
