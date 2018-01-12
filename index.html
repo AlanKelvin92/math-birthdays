@@ -78,7 +78,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
     <script src="vendors/datepicker.min.js"></script>
     <script>
-        (function() {
+        (() => {
             const findNextMathBirthday = (birthday) =>{
                 const today = moment();
                 let mathBday = birthday;
@@ -89,7 +89,7 @@
                     cont++;
                 }
 
-                return {yearsOld: cont, mathBday:moment(mathBday).format("MM-DD-YYYY") }
+                return {yearsOld: cont, mathBday: moment(mathBday).format("MM-DD-YYYY") }
             }
 
             const bindEvents = () => {
@@ -100,10 +100,11 @@
                 const mathBirthdayAnswer = document.querySelector('#math-birthday-answer');
                 const dialog = document.querySelector('dialog');
 
+                //Datepicker initializer
                 $('[data-toggle="datepicker"]').datepicker({
                     format: "yyyy-mm-dd",
                     endDate: "today"
-                }); //Datepicker initializer
+                }); 
 
                 birthdayMobileInput.max = moment().format("YYYY-MM-DD")
     
@@ -127,13 +128,11 @@
                 goBtn.addEventListener('click', proccessBirthday);
                 birthdayInput.addEventListener('keyup', proccessBirthday);
                 birthdayMobileInput.addEventListener('keyup', proccessBirthday);
-                dialog.querySelector('.close').addEventListener('click', () => {
-                    dialog.close();
-                });
+                dialog.querySelector('.close').addEventListener('click', () => dialog.close());
             }
 
             bindEvents();
-        }());
+        })();
     </script>
 </body>
 </html>
